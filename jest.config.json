@@ -1,0 +1,8 @@
+{
+  "collectCoverageFrom": [
+    "src/*.js"
+  ],
+  "testMatch"          : [
+    "**/?(*.)(ut.spec).js?(x)"
+  ]
+}
