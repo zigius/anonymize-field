@@ -21,7 +21,8 @@ class Anonymizer {
                 } else {
                     console.log('OK - ', record);
                 }
-            }
+
+        }
         } catch (error) {
             throw error;
         }
