@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/zigius/anonymize-field#readme",
   "dependencies": {
+    "aerospike": "^3.14.1",
     "jest": "^25.1.0"
   }
 }

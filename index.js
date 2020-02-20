@@ -1,3 +1,3 @@
 'use strict';
 
-exports.anonymize = require('./src/Anonymize');
+exports.anonymize = require('./src/Anonymizer');
