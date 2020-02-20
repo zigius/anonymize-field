@@ -1,6 +1,6 @@
 'use strict';
 
-const Aerospike = require('aerospike')
+const Aerospike = require('aerospike');
 
 class Anonymizer {
     constructor({ aerospikeClient } = {}) {
@@ -9,7 +9,19 @@ class Anonymizer {
 
     async anonymize(field) {
         try {
-            const a      = 3;
+            this.aerospikeClient.get(key, function (error, record) {
+                if (error) {
+                    switch (error.code) {
+                        case Aerospike.status.AEROSPIKE_ERR_RECORD_NOT_FOUND:
+                            console.log('NOT_FOUND -', key);
+                            break;
+                        default:
+                            console.log('ERR - ', error, key);
+                    }
+                } else {
+                    console.log('OK - ', record);
+                }
+            }
         } catch (error) {
             throw error;
         }
@@ -18,11 +30,12 @@ class Anonymizer {
 
     async anonymizeMany(fields) {
         try {
-            const a      = 3;
+            const a = 3;
         } catch (error) {
             throw error;
         }
     }
+
 
 }
 
