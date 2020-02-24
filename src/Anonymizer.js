@@ -9,37 +9,43 @@ class Anonymizer {
         this.aerospikeClient = aerospikeClient;
     }
 
-    async anonymize(id) {
+    async anonymize(namespace, id, set = null, reverseLookupSet = null) {
 
-        const idKey          = new Aerospike.Key('test', 'demo', 'key1');
-        const aerospikeValue = await this.aerospikeClient.get(idKey);
-        if (aerospikeValue)
-            return { anonymizedId: aerospikeValue.anonymized_id, id };
-        let anonymizedId = uuidv4();
+        const idKey = new Aerospike.Key(namespace, set, id);
+
+        const anonymizedId = uuidv4();
         try {
-            await this.aerospikeClient.put(idKey, { anonymized_id: anonymizedId });
-            return { anonymizedId, id };
+            const aerospikeValue = await this.aerospikeClient.get(idKey);
+            return { anonymizedId: aerospikeValue.bins.anonymized_id, id };
         } catch (error) {
-            if (error.code === Aerospike.status.AEROSPIKE_ERR_RECORD_NOT_FOUND) {
-                const aerospikeValue = await this.aerospikeClient.get(key);
-                anonymizedId         = aerospikeValue.anonymized_id;
-            } else {
+            if (error.code !== Aerospike.status.AEROSPIKE_ERR_RECORD_NOT_FOUND) {
+                console.log('Anonymizer#anonymize ERR - ', error);
                 throw new Error(error);
-                console.log('ERR - ', error, key);
             }
         }
 
         try {
-            const anonymizedIdKey = new Aerospike.Key('test', 'demo', 'key1');
-            await this.aerospikeClient.put(anonymizedIdKey, { id });
+            await this.aerospikeClient.put(idKey, { anonymized_id: anonymizedId });
         } catch (error) {
-            console.log('ERR - ', error, key);
-        } finally {
+            if (error.code !== Aerospike.status.AEROSPIKE_ERR_RECORD_EXISTS) {
+                console.log('Anonymizer#anonymize ERR - ', error);
+                throw new Error(error);
+            }
+            const aerospikeValue = await this.aerospikeClient.get(key);
+            return { anonymizedId: aerospikeValue.bins.anonymized_id, id };
+        }
+
+        try {
+            const anonymizedIdKey = new Aerospike.Key(namespace, reverseLookupSet, anonymizedId);
+            await this.aerospikeClient.put(anonymizedIdKey, { id });
             return { anonymizedId, id };
+        } catch (error) {
+            console.log('Anonymizer#anonymize ERR - ', error);
+            throw new Error(error);
         }
     }
 
-    async anonymizeMany(ids) {
+    async anonymizeMany(namespace, ids) {
         try {
             const a = 3;
         } catch (error) {

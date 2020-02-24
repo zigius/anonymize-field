@@ -4,5 +4,6 @@
   ],
   "testMatch"          : [
     "**/?(*.)(ut.spec).js?(x)"
-  ]
+  ],
+  "setupFiles": ["dotenv/config"]
 }
