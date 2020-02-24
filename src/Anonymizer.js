@@ -1,7 +1,6 @@
 'use strict';
 
-const retry  = require('async-retry');
-const uuidv4 = require('uuid/v4');
+const uuidv4    = require('uuid/v4');
 const Aerospike = require('aerospike');
 
 
@@ -11,27 +10,34 @@ class Anonymizer {
     }
 
     async anonymize(id) {
-        const key = new Aerospike.Key('test', 'demo', 'key1');
-        try {
-            const anonymizedId = await retry(async bail => {
-                const aerospikeValue = await this.aerospikeClient.get(key);
-                if (aerospikeValue)
-                    return aerospikeValue.new_id;
-                const new_id = await this.aerospikeClient.get(key);
 
-            });
+        const idKey          = new Aerospike.Key('test', 'demo', 'key1');
+        const aerospikeValue = await this.aerospikeClient.get(idKey);
+        if (aerospikeValue)
+            return { anonymizedId: aerospikeValue.anonymized_id, id };
+        let anonymizedId = uuidv4();
+        try {
+            await this.aerospikeClient.put(idKey, { anonymized_id: anonymizedId });
             return { anonymizedId, id };
         } catch (error) {
-            switch (error.code) {
-                case Aerospike.status.AEROSPIKE_ERR_RECORD_NOT_FOUND:
-                    console.log('NOT_FOUND -', key);
-                    break;
-                default:
-                    console.log('ERR - ', error, key);
+            if (error.code === Aerospike.status.AEROSPIKE_ERR_RECORD_NOT_FOUND) {
+                const aerospikeValue = await this.aerospikeClient.get(key);
+                anonymizedId         = aerospikeValue.anonymized_id;
+            } else {
+                throw new Error(error);
+                console.log('ERR - ', error, key);
             }
         }
-    }
 
+        try {
+            const anonymizedIdKey = new Aerospike.Key('test', 'demo', 'key1');
+            await this.aerospikeClient.put(anonymizedIdKey, { id });
+        } catch (error) {
+            console.log('ERR - ', error, key);
+        } finally {
+            return { anonymizedId, id };
+        }
+    }
 
     async anonymizeMany(ids) {
         try {
@@ -43,22 +49,5 @@ class Anonymizer {
 
 
 }
-
-//
-// await retry(async bail => {
-//   // if anything throws, we retry
-//   const res = await fetch('https://google.com')
-//
-//   if (403 === res.status) {
-//     // don't retry upon 403
-//     bail(new Error('Unauthorized'))
-//     return
-//   }
-//
-//   const data = await res.text()
-//   return data.substr(0, 500)
-// }, {
-//   retries: 5
-// })
 
 module.exports = Anonymizer;
