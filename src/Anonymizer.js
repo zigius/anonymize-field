@@ -36,8 +36,8 @@ class Anonymizer {
         }
 
         try {
-            const anonymizedIdKey = new Aerospike.Key(namespace, reverseLookupSet, anonymizedId);
-            await this.aerospikeClient.put(anonymizedIdKey, { id });
+            const reverseLookupKey = new Aerospike.Key(namespace, reverseLookupSet, anonymizedId);
+            await this.aerospikeClient.put(reverseLookupKey, { id });
             return { anonymizedId, id };
         } catch (error) {
             console.log('Anonymizer#anonymize ERR - ', error);
