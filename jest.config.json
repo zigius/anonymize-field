@@ -3,7 +3,10 @@
     "src/*.js"
   ],
   "testMatch"          : [
-    "**/?(*.)(ut.spec).js?(x)"
+    "**/?(*.)(ut.spec).js?(x)",
+    "**/?(*.)(it.spec).js?(x)"
   ],
-  "setupFiles": ["dotenv/config"]
+  "setupFiles"         : [
+    "dotenv/config"
+  ]
 }

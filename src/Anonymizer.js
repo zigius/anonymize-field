@@ -5,7 +5,7 @@ const Aerospike = require('aerospike');
 
 
 class Anonymizer {
-    constructor({ aerospikeClient } = {}) {
+    constructor(aerospikeClient) {
         this.aerospikeClient = aerospikeClient;
     }
 
@@ -31,7 +31,7 @@ class Anonymizer {
                 console.log('Anonymizer#anonymize ERR - ', error);
                 throw new Error(error);
             }
-            const aerospikeValue = await this.aerospikeClient.get(key);
+            const aerospikeValue = await this.aerospikeClient.get(idKey);
             return { anonymizedId: aerospikeValue.bins.anonymized_id, id };
         }
 
