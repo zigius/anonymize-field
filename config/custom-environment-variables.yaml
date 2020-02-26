@@ -1,0 +1,5 @@
+---
+aerospike:
+  hosts: AEROSPIKE_HOSTS
+  namespace: NAMESPACE
+

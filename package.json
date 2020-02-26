@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --coverage --forceExit --runInBand --config jest.config.json",
+    "test-integration": "jest --coverage --forceExit --runInBand --config jest.config.json test/spec/Anonymizer.it.spec.js",
+    "test-unit-tests": "jest --coverage --forceExit --runInBand --config jest.config.json test/spec/Anonymizer.ut.spec.js"
   },
   "repository": {
     "type": "git",

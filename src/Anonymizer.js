@@ -3,8 +3,13 @@
 const uuidv4    = require('uuid/v4');
 const Aerospike = require('aerospike');
 const _         = require('lodash/fp');
+const config    = require('config');
 
 class Anonymizer {
+
+    constructor(hosts) {
+        this.hosts = hosts || config.aerospike.hosts;
+    }
 
     async init(aerospikeClient) {
         if (aerospikeClient) {
@@ -23,7 +28,8 @@ class Anonymizer {
             policies: {
                 read : new Aerospike.ReadPolicy(defaults),
                 write: writePolicy
-            }
+            },
+            hosts   : this.hosts,
         };
 
         this.aerospikeClient = await Aerospike.connect(config);
@@ -63,6 +69,10 @@ class Anonymizer {
             console.log('Anonymizer#anonymize ERR - ', error);
             throw new Error(error);
         }
+    }
+
+    close() {
+        this.aerospikeClient.close();
     }
 
     async anonymizeMany(namespace, ids) {
