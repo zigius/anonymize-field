@@ -52,8 +52,6 @@ class Anonymizer {
             throw error;
         }
     }
-
-
 }
 
 module.exports = Anonymizer;
