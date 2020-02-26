@@ -7,8 +7,8 @@ const config    = require('config');
 
 class Anonymizer {
 
-    constructor(hosts) {
-        this.hosts = hosts || config.aerospike.hosts;
+    constructor(options) {
+        this.options = _.merge(config.aerospike)(options);
     }
 
     async init(aerospikeClient) {
@@ -17,20 +17,20 @@ class Anonymizer {
             return;
         }
 
-        const defaults    = {
+        const policyDefaults    = {
             socketTimeout: 50,
             totalTimeout : 3000
         };
-        const writePolicy = new Aerospike.policy.WritePolicy(_.merge(defaults)({
+        const writePolicy = new Aerospike.policy.WritePolicy(_.merge(policyDefaults)({
             exists: Aerospike.policy.exists.CREATE,
         }));
-        const config      = {
+
+        const config      = _.merge({
             policies: {
-                read : new Aerospike.ReadPolicy(defaults),
+                read : new Aerospike.ReadPolicy(policyDefaults),
                 write: writePolicy
             },
-            hosts   : this.hosts,
-        };
+        })(this.options);
 
         this.aerospikeClient = await Aerospike.connect(config);
     }
@@ -75,7 +75,7 @@ class Anonymizer {
         this.aerospikeClient.close();
     }
 
-    async anonymizeMany(namespace, ids) {
+    async anonymizeMany(namespace, ids, set = null, reverseLookupSet = null) {
         try {
             const a = 3;
         } catch (error) {
