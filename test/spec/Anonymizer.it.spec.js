@@ -8,7 +8,6 @@ jest.mock('uuid/v4');
 const originalUuidv4 = jest.requireActual('uuid/v4');
 
 describe('Anonymizer', function () {
-    // uuidv4.mockImplementation(() => mockUuid);
     describe('Test anonymization properly configureds client', () => {
 
         let defaults    = {
