@@ -2,11 +2,31 @@
 
 const uuidv4    = require('uuid/v4');
 const Aerospike = require('aerospike');
-
+const _         = require('lodash/fp');
 
 class Anonymizer {
-    constructor(aerospikeClient) {
-        this.aerospikeClient = aerospikeClient;
+
+    async init(aerospikeClient) {
+        if (aerospikeClient) {
+            this.aerospikeClient = aerospikeClient;
+            return;
+        }
+
+        const defaults    = {
+            socketTimeout: 50,
+            totalTimeout : 3000
+        };
+        const writePolicy = new Aerospike.policy.WritePolicy(_.merge(defaults)({
+            exists: Aerospike.policy.exists.CREATE,
+        }));
+        const config      = {
+            policies: {
+                read : new Aerospike.ReadPolicy(defaults),
+                write: writePolicy
+            }
+        };
+
+        this.aerospikeClient = await Aerospike.connect(config);
     }
 
     async anonymize(namespace, id, set = null, reverseLookupSet = null) {

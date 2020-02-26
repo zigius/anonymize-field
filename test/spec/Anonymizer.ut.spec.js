@@ -26,7 +26,8 @@ describe('Anonymizer', function () {
                             { message: 'message bul', name: 'errorrr', code: aerospike.status.AEROSPIKE_ERR_RECORD_EXISTS }),
                     };
 
-                    const anonymizer          = new Anonymizer(aerospikeMock);
+                    const anonymizer          = new Anonymizer();
+                    await anonymizer.init(aerospikeMock);
                     const id                  = originalUuidv4();
                     const anonymizationResult = await anonymizer.anonymize('process.env.NAMESPACE', id);
                     expect(anonymizationResult.anonymizedId).toEqual(aerospikeGetResult.bins.anonymized_id);
@@ -51,7 +52,8 @@ describe('Anonymizer', function () {
                             { message: 'message bul', name: 'errorrr', code: aerospike.status.AEROSPIKE_ERR_RECORD_EXISTS }),
                     };
 
-                    const anonymizer          = new Anonymizer(aerospikeMock);
+                    const anonymizer          = new Anonymizer();
+                    await anonymizer.init(aerospikeMock);
                     const id                  = originalUuidv4();
                     const anonymizationResult = await anonymizer.anonymize('process.env.NAMESPACE', id);
                     expect(anonymizationResult.anonymizedId).toEqual(aerospikeGetResult.bins.anonymized_id);

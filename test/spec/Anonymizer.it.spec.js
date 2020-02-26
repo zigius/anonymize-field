@@ -10,29 +10,17 @@ const originalUuidv4 = jest.requireActual('uuid/v4');
 describe('Anonymizer', function () {
     describe('Test anonymization properly configureds client', () => {
 
-        let defaults    = {
-            socketTimeout: 50,
-            totalTimeout : 3000
-        };
-        let writePolicy = new Aerospike.policy.WritePolicy(_.merge(defaults)({
-            exists: Aerospike.policy.exists.CREATE,
-        }));
-        let config      = {
-            policies: {
-                read : new Aerospike.ReadPolicy(defaults),
-                write: writePolicy
-            }
-        };
 
         test('anonymize - id exists in aerospike - should return saved anonymized id', async () => {
 
-            const aerospikeClient = await Aerospike.connect(config);
+            const aerospikeClient = await Aerospike.connect();
             const id              = originalUuidv4();
             const anonymizedId    = originalUuidv4();
             const idKey           = new Aerospike.Key(process.env.NAMESPACE, null, id);
             await aerospikeClient.put(idKey, { anonymized_id: anonymizedId });
 
-            const anonymizer          = new Anonymizer(aerospikeClient);
+            const anonymizer = new Anonymizer();
+            await anonymizer.init();
             const anonymizationResult = await anonymizer.anonymize(process.env.NAMESPACE, id);
             expect(anonymizationResult.anonymizedId).toEqual(anonymizedId);
         });
@@ -41,14 +29,15 @@ describe('Anonymizer', function () {
             async () => {
                 try {
 
-                    const aerospikeClient = await Aerospike.connect(config);
+                    const aerospikeClient = await Aerospike.connect();
                     const id              = originalUuidv4();
-                    await Aerospike.connect(config);
+                    await Aerospike.connect();
 
                     const mockUuid = originalUuidv4();
                     uuidv4.mockImplementation(() => mockUuid);
 
-                    const anonymizer          = new Anonymizer(aerospikeClient);
+                    const anonymizer = new Anonymizer();
+                    await anonymizer.init();
                     const anonymizationResult = await anonymizer.anonymize(process.env.NAMESPACE, id);
                     expect(anonymizationResult.anonymizedId).toEqual(mockUuid);
                     const reverseKey         = new Aerospike.Key(process.env.NAMESPACE, null, mockUuid);
